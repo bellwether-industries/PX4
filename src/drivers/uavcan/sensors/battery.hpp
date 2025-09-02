@@ -76,7 +76,8 @@ private:
 	void sumDischarged(hrt_abstime timestamp, float current_a);
 	void determineWarning(float remaining);
 	void filterData(const uavcan::ReceivedDataStructure<uavcan::equipment::power::BatteryInfo> &msg, uint8_t instance);
-	void updateBatteryParams(uint8_t instance, float capacity, u_int32_t cell_count);
+	void updateBatteryCapacityParam(uint8_t instance, float capacity);
+	void updateBatteryCellCountParam(uint8_t instance, uint32_t cell_count);
 
 	typedef uavcan::MethodBinder < UavcanBatteryBridge *,
 		void (UavcanBatteryBridge::*)

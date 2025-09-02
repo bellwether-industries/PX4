@@ -345,10 +345,15 @@ void Battery::computeScale()
 	}
 }
 
-float Battery::computeRemainingTime(float current_a)
+float Battery::computeRemainingTime(float current_a, bool measure_dt)
 {
 	float time_remaining_s = NAN;
 	bool reset_current_avg_filter = false;
+	float dt = 0.f;
+
+	if (measure_dt && _last_compute_timestamp != 0) {
+		dt = (hrt_absolute_time() - _last_compute_timestamp) / 1e6f;
+	}
 
 	if (_vehicle_status_sub.updated()) {
 		vehicle_status_s vehicle_status;
@@ -376,8 +381,15 @@ float Battery::computeRemainingTime(float current_a)
 		// For FW only update when we are in level flight
 		if (!_vehicle_status_is_fw || ((hrt_absolute_time() - _flight_phase_estimation_sub.get().timestamp) < 2_s
 					       && _flight_phase_estimation_sub.get().flight_phase == flight_phase_estimation_s::FLIGHT_PHASE_LEVEL)) {
-			// only update with positive numbers
-			_current_average_filter_a.update(fmaxf(current_a, 0.f));
+
+			// Some sensors like Smart Batteries have slow uneven updaterates, because of that we want to send the timing with the updates
+			if (measure_dt) {
+				_current_average_filter_a.update(fmaxf(current_a, 0.f), dt);
+
+			} else {
+				// only update with positive numbers
+				_current_average_filter_a.update(fmaxf(current_a, 0.f));
+			}
 		}
 	}
 
@@ -388,10 +400,11 @@ float Battery::computeRemainingTime(float current_a)
 		time_remaining_s = remaining_capacity_mah / current_ma * 3600.f;
 	}
 
-	PX4_INFO("state of charge: %f", (double)_state_of_charge);
-	PX4_INFO("current_a: %f", (double)current_a);
-	PX4_INFO("current_average_a: %f", (double)_current_average_filter_a.getState());
-	PX4_INFO("time_remaining_s: %f", (double)time_remaining_s);
+	// Update timestamp for next dt calculation
+	if (measure_dt) {
+		_last_compute_timestamp = hrt_absolute_time();
+	}
+
 	return time_remaining_s;
 }
 

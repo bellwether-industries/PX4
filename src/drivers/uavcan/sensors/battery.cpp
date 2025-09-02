@@ -113,8 +113,7 @@ UavcanBatteryBridge::battery_sub_cb(const uavcan::ReceivedDataStructure<uavcan::
 
 	_battery_status[instance].timestamp = hrt_absolute_time();
 	_battery_status[instance].voltage_v = msg.voltage;
-	_battery_status[instance].current_a = msg.current;
-	_battery_status[instance].current_average_a = msg.current;
+	_battery_status[instance].current_a = -msg.current;
 
 	if (_batt_update_mod[instance] == BatteryDataType::Raw) {
 		sumDischarged(_battery_status[instance].timestamp, _battery_status[instance].current_a);
@@ -125,15 +124,11 @@ UavcanBatteryBridge::battery_sub_cb(const uavcan::ReceivedDataStructure<uavcan::
 	_battery_status[instance].remaining = msg.state_of_charge_pct / 100.0f; // between 0 and 1
 	_battery_status[instance].scale = -1.f;
 	_battery_status[instance].temperature = msg.temperature + atmosphere::kAbsoluteNullCelsius; // Kelvin to Celsius
-	// _battery_status[instance].cell_count = msg.;
 	_battery_status[instance].connected = true;
 	_battery_status[instance].source = msg.status_flags & uavcan::equipment::power::BatteryInfo::STATUS_FLAG_IN_USE;
-	// _battery_status[instance].priority = msg.;
-	_battery_status[instance].capacity = msg.full_charge_capacity_wh;
+	_battery_status[instance].capacity = msg.full_charge_capacity_wh * 1000.f / msg.voltage;
 	_battery_status[instance].full_charge_capacity_wh = msg.full_charge_capacity_wh;
 	_battery_status[instance].remaining_capacity_wh = msg.remaining_capacity_wh;
-	// _battery_status[instance].cycle_count = msg.;
-	// _battery_status[instance].average_time_to_empty = msg.;
 	_battery_status[instance].id = msg.getSrcNodeID().get();
 
 	if (_batt_update_mod[instance] == BatteryDataType::Raw) {
@@ -144,9 +139,11 @@ UavcanBatteryBridge::battery_sub_cb(const uavcan::ReceivedDataStructure<uavcan::
 		_battery_status[instance].cell_count = 1;
 	}
 
-	// _battery_status[instance].max_cell_voltage_delta = msg.;
+	updateBatteryCapacityParam(instance, msg.full_charge_capacity_wh * msg.voltage);
 
-	// _battery_status[instance].is_powering_off = msg.;
+	_battery[instance]->setStateOfCharge(msg.state_of_charge_pct / 100.0f);
+	_battery_status[instance].time_remaining_s = _battery[instance]->computeRemainingTime(-msg.current, true);
+	_battery_status[instance].current_average_a = _battery[instance]->getCurrentAverage();
 
 	determineWarning(_battery_status[instance].remaining);
 	_battery_status[instance].warning = _warning;
@@ -189,14 +186,13 @@ UavcanBatteryBridge::battery_aux_sub_cb(const uavcan::ReceivedDataStructure<ardu
 	_battery_status[instance].cycle_count = msg.cycle_count;
 	_battery_status[instance].over_discharge_count = msg.over_discharge_count;
 	_battery_status[instance].nominal_voltage = msg.nominal_voltage;
-	_battery_status[instance].time_remaining_s = math::isZero(_battery_status[instance].current_a) ? NAN :
-			(_battery_status[instance].remaining_capacity_wh /
-			 _battery_status[instance].nominal_voltage / _battery_status[instance].current_a * 3600);
 	_battery_status[instance].is_powering_off = msg.is_powering_off;
 
 	for (uint8_t i = 0; i < _battery_status[instance].cell_count; i++) {
 		_battery_status[instance].voltage_cell_v[i] = msg.voltage_cell[i];
 	}
+
+	updateBatteryCellCountParam(instance, _battery_status[instance].cell_count);
 
 	// Publish the message once populated with the standard BatteryInfo data
 	if (_battery_status[instance].timestamp != 0) {
@@ -221,7 +217,8 @@ void UavcanBatteryBridge::cbat_sub_cb(const uavcan::ReceivedDataStructure<cuav::
 
 	// Update the BAT Parameters based on CBAT message
 	if (!_param_updated) {
-		updateBatteryParams(instance, msg.full_charge_capacity, msg.cell_count);
+		updateBatteryCapacityParam(instance, msg.full_charge_capacity);
+		updateBatteryCellCountParam(instance, msg.cell_count);
 		_param_updated = true;
 	}
 
@@ -255,7 +252,7 @@ void UavcanBatteryBridge::cbat_sub_cb(const uavcan::ReceivedDataStructure<cuav::
 
 	// use Battery class for time_remaining calculation
 	_battery[instance]->setStateOfCharge(msg.state_of_charge / 100.f);
-	_battery_status[instance].time_remaining_s = _battery[instance]->computeRemainingTime(-msg.current);
+	_battery_status[instance].time_remaining_s = _battery[instance]->computeRemainingTime(-msg.current, true);
 
 	for (uint8_t i = 0; i < _battery_status[instance].cell_count; i++) {
 		_battery_status[instance].voltage_cell_v[i] = msg.voltage_cell[i];
@@ -354,12 +351,17 @@ UavcanBatteryBridge::filterData(const uavcan::ReceivedDataStructure<uavcan::equi
 }
 
 void
-UavcanBatteryBridge::updateBatteryParams(uint8_t instance, float capacity, uint32_t cell_count)
+UavcanBatteryBridge::updateBatteryCapacityParam(uint8_t instance, float capacity)
 {
 	char param_name[17];
 	snprintf(param_name, sizeof(param_name), "BAT%d_CAPACITY", instance + 1);
 	param_set(param_find(param_name), &capacity);
+}
 
+void
+UavcanBatteryBridge::updateBatteryCellCountParam(uint8_t instance, uint32_t cell_count)
+{
+	char param_name[17];
 	snprintf(param_name, sizeof(param_name), "BAT%d_N_CELLS", instance + 1);
 	param_set(param_find(param_name), &cell_count);
 }

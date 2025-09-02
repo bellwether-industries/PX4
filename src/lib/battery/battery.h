@@ -101,6 +101,7 @@ public:
 	void updateBatteryStatus(const hrt_abstime &timestamp);
 
 	battery_status_s getBatteryStatus();
+	float getCurrentAverage() const {return PX4_ISFINITE(_current_average_filter_a.getState()) ? _current_average_filter_a.getState() : -1.f;}
 	void publishBatteryStatus(const battery_status_s &battery_status);
 
 	/**
@@ -116,9 +117,10 @@ public:
 	 * if used externally make sure to set the capacity and state of charge with setCapacity() and setStateOfCharge().
 	 *
 	 * @param current_a The current draw from the battery in amperes.
+	 * @param measure_dt If true, tracks dt between calls and passes it to the current averaging filter.
 	 * @return Estimated remaining time in seconds.
 	 */
-	float computeRemainingTime(float current_a);
+	float computeRemainingTime(float current_a, bool measure_dt = false);
 
 protected:
 	static constexpr float LITHIUM_BATTERY_RECOGNITION_VOLTAGE = 2.1f;
@@ -186,6 +188,7 @@ private:
 	float _scale{1.f};
 	uint8_t _warning{battery_status_s::WARNING_NONE};
 	hrt_abstime _last_timestamp{0};
+	hrt_abstime _last_compute_timestamp{0}; ///< timestamp for dt calculation in computeRemainingTime
 	bool _armed{false};
 	bool _vehicle_status_is_fw{false};
 	hrt_abstime _last_unconnected_timestamp{0};
