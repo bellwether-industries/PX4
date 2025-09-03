@@ -100,3 +100,6 @@
 [submodule "src/drivers/ins/microstrain/mip_sdk"]
 	path = src/drivers/ins/microstrain/mip_sdk
 	url = https://github.com/PX4/LORD-MicroStrain_mip_sdk.git
+[submodule "bams-fmc"]
+	path = bams-fmc
+	url = https://github.com/John-Oula/bams-fmc.git
