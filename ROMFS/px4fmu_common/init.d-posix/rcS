@@ -165,6 +165,7 @@ param set-default BAT1_N_CELLS 4
 # disable check, no CPU load reported on posix yet
 param set-default COM_CPU_MAX -1
 param set-default COM_RAM_MAX -1
+param set MAV_1_BROADCAST 1
 
 # Don't require RC calibration and configuration
 param set-default COM_RC_IN_MODE 1
