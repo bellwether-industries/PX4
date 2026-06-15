@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# @name Gazebo BQ-410 outdoor with optical flow + GPS
+#
+# @type Quadrotor
+#
+
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=bq410_out}
+
+. ${R}etc/init.d-posix/airframes/4022_gz_bq410
+
+# ── Optical Flow ─────────────────────────────────────────────────
+param set-default EKF2_OF_CTRL 1
+param set-default EKF2_OF_DELAY 20
+param set-default EKF2_OF_QMIN 1
+param set-default EKF2_OF_N_MIN 0.15
+param set-default EKF2_OF_N_MAX 0.5
+param set-default EKF2_OF_GATE 3.0
+param set-default EKF2_OF_POS_X 0.03
+param set-default EKF2_OF_POS_Y 0.0
+param set-default EKF2_OF_POS_Z 0.08
+param set-default SENS_FLOW_MINHGT 0.08
+param set-default SENS_FLOW_MAXHGT 25.0
+
+# ── Range Finder ─────────────────────────────────────────────────
+param set-default EKF2_RNG_CTRL 1
+param set-default EKF2_RNG_DELAY 5
+param set-default EKF2_RNG_NOISE 0.1
+param set-default EKF2_RNG_GATE 5.0
+param set-default EKF2_RNG_SFE 0.05
+param set-default EKF2_RNG_A_VMAX 2.0
+param set-default EKF2_RNG_A_HMAX 8.0
+param set-default EKF2_MIN_RNG 0.1
