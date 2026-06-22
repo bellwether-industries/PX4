@@ -16,18 +16,23 @@ param set-default EKF2_OF_QMIN 1
 param set-default EKF2_OF_N_MIN 0.15
 param set-default EKF2_OF_N_MAX 0.5
 param set-default EKF2_OF_GATE 3.0
-param set-default EKF2_OF_POS_X 0.03
+param set-default EKF2_OF_POS_X 0.06
 param set-default EKF2_OF_POS_Y 0.0
-param set-default EKF2_OF_POS_Z 0.08
+param set-default EKF2_OF_POS_Z 0.01
 param set-default SENS_FLOW_MINHGT 0.08
-param set-default SENS_FLOW_MAXHGT 25.0
+param set-default SENS_FLOW_MAXHGT 100.0
 
 # ── Range Finder ─────────────────────────────────────────────────
-param set-default EKF2_RNG_CTRL 1
+param set-default EKF2_RNG_CTRL 2
 param set-default EKF2_RNG_DELAY 5
 param set-default EKF2_RNG_NOISE 0.1
 param set-default EKF2_RNG_GATE 5.0
 param set-default EKF2_RNG_SFE 0.05
-param set-default EKF2_RNG_A_VMAX 2.0
-param set-default EKF2_RNG_A_HMAX 8.0
-param set-default EKF2_MIN_RNG 0.1
+param set-default EKF2_RNG_A_VMAX 1.0
+param set-default EKF2_RNG_A_HMAX 5.0
+param set-default EKF2_MIN_RNG 0.05
+
+# ── GPS: enabled for outdoor SITL ────────────────────────────────
+param set EKF2_GPS_CTRL 7
+param set SYS_HAS_GPS 1
+param set SIM_GPS_USED 1
