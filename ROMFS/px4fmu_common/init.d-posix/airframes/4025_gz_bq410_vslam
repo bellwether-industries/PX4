@@ -59,3 +59,7 @@ param set EKF2_GPS_CTRL 0
 param set SYS_HAS_GPS 0
 param set SIM_GPS_USED 0
 param set COM_ARM_WO_GPS 1
+
+# ── Flight limits ──────────────────────────────────────────────────
+param set-default MC_YAWRATE_MAX 15
+param set-default MPC_XY_VEL_ALL 0.5
