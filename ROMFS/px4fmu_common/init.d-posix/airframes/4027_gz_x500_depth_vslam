@@ -10,7 +10,7 @@ PX4_SIM_MODEL=${PX4_SIM_MODEL:=x500_depth_vslam}
 . ${R}etc/init.d-posix/airframes/4001_gz_x500
 
 # ── External Vision (VIO / VSLAM via RealSense D435i) ───────────
-# Camera mount relative to base_link: .138 .0175 .198 (x500_depth_vslam/model.sdf)
+# Camera mount relative to base_link: .138 .0175 .190 (x500_depth_vslam/model.sdf)
 # X=0.138: front bar, 1st-row circular mount, slightly forward of default .12
 param set EKF2_EV_CTRL 11
 param set EKF2_EV_DELAY 160
@@ -23,7 +23,7 @@ param set EKF2_EVP_GATE 8.0
 param set EKF2_EVV_GATE 3.0
 param set EKF2_EV_POS_X 0.138
 param set EKF2_EV_POS_Y 0.0175
-param set EKF2_EV_POS_Z 0.198
+param set EKF2_EV_POS_Z 0.190
 param set EKF2_HGT_REF 1
 
 # ── Barometer: disabled (height from EV) ─────────────────────────
