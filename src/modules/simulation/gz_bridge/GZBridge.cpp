@@ -259,14 +259,20 @@ bool GZBridge::subscribeOdometry(bool required)
 
 bool GZBridge::subscribeLaserScan(bool required)
 {
-	std::string laser_scan_topic = "/world/" + _world_name + "/model/" + _model_name + "/link/link/sensor/lidar_2d_v2/scan";
+	const std::string topic_prefix = "/world/" + _world_name + "/model/" + _model_name + "/link/";
+	const std::string laser_scan_topics[] = {
+		topic_prefix + "lidar_2d_generic_link/sensor/lidar_2d_generic/scan",
+		topic_prefix + "link/sensor/lidar_2d_v2/scan",
+	};
 
-	if (!_node.Subscribe(laser_scan_topic, &GZBridge::laserScanCallback, this)) {
-		PX4_WARN("failed to subscribe to %s", laser_scan_topic.c_str());
-		return required ? false : true;
+	for (const auto &laser_scan_topic : laser_scan_topics) {
+		if (_node.Subscribe(laser_scan_topic, &GZBridge::laserScanCallback, this)) {
+			return true;
+		}
 	}
 
-	return true;
+	PX4_WARN("failed to subscribe to 2D lidar laser scan");
+	return required ? false : true;
 }
 
 bool GZBridge::subscribeDistanceSensor(bool required)
