@@ -261,6 +261,7 @@ bool GZBridge::subscribeLaserScan(bool required)
 {
 	const std::string topic_prefix = "/world/" + _world_name + "/model/" + _model_name + "/link/";
 	const std::string laser_scan_topics[] = {
+		"/lidar/scan",
 		topic_prefix + "lidar_2d_generic_link/sensor/lidar_2d_generic/scan",
 		topic_prefix + "link/sensor/lidar_2d_v2/scan",
 	};
