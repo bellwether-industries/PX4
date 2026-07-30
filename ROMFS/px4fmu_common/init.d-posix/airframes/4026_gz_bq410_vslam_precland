@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# @name Gazebo BQ-410 VSLAM with D455 + optical flow, no mag, no GPS, ArUco precision landing
+#
+# @type Quadrotor
+#
+
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=bq410_vslam_precland}
+
+. ${R}etc/init.d-posix/airframes/4025_gz_bq410_vslam
+
+# ── Precision Landing (ArUco marker via downward camera) ─────────
+# SENS_EN_IRLOCK is required by landing_target_estimator even though no physical
+# IR-Lock sensor is used here — the target position comes from the downward camera.
+param set SENS_EN_IRLOCK 1
+
+# Indoor landing pad is stationary, so also use the target measurements to
+# correct the vehicle's own position estimate.
+param set LTEST_MODE 1
+
+param set PLD_HACC_RAD 0.2
+param set PLD_BTOUT 5
+param set PLD_FAPPR_ALT 0.1
+
+# Indoor space is small: cap search climbs/retries and lower the search altitude
+# well below the 10 m default so the vehicle doesn't hit the ceiling.
+param set PLD_MAX_SRCH 3
+param set PLD_SRCH_ALT 2
