@@ -92,7 +92,7 @@ px4_add_romfs_files(
 	4023_gz_bq410_mono_cam
 	4024_gz_bq410_out
 	4025_gz_bq410_vslam
-	4026_gz_bq410_vslam_precland
+	4026_gz_bq410_vslam_aruco_cam
 	4027_gz_x500_depth_vslam
 
 	6011_gazebo-classic_typhoon_h480

@@ -5,7 +5,7 @@
 # @type Quadrotor
 #
 
-PX4_SIM_MODEL=${PX4_SIM_MODEL:=bq410_vslam_precland}
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=bq410_vslam_aruco_cam}
 
 . ${R}etc/init.d-posix/airframes/4025_gz_bq410_vslam
 
